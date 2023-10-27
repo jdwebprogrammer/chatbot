@@ -1,0 +1,4 @@
+ctransformers
+sentence-transformers
+chromadb
+streamlit
