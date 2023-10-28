@@ -29,11 +29,9 @@ class AppModel:
         global MODEL_DIR
         st.write("Starting app")
         self.embedding_model_name = embedding_model_name
-        self.emb_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
+        self.emb_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=EMBEDDING_MODEL.split("/")[1])
         self.chroma_client = chromadb.Client(Settings(anonymized_telemetry=False,persist_directory="./data/vectorstore"))
         #self.chroma_client_persist = chromadb.PersistentClient(path="./data/vectorstore",settings=Settings(anonymized_telemetry=False))
-        self.new_model_name = "custom_model"
-        self.new_model_path = f"./{self.new_model_name}"
         self.sentences = [] 
         self.ref_collection = self.chroma_client.get_or_create_collection("ref", embedding_function=self.emb_fn)
         self.logs_collection = self.chroma_client.get_or_create_collection("logs", embedding_function=self.emb_fn)
@@ -50,8 +48,8 @@ class AppModel:
         global pre_prompt_instruction
         last_msgs = str(self.chat_log[-3:])
         embed_result = self.get_embedding_docs(last_msgs + " \n\n " + input_prompt)[:self.context_limit]
-        new_query = f"[INSTRUCTION]{pre_prompt_instruction}[/INSTRUCTION] \n\n [DATA]{str(embed_result)}[/DATA] \n\n "
-        new_query += f"[Previous User Chat]: \n {last_msgs} \n\n [User Prompt]: \n {input_prompt} \n\n [Response]: \n "
+        new_query = f"[Instruction]: {pre_prompt_instruction} \n\n [Data]: {str(embed_result)} \n\n "
+        new_query += f"[Previous User Chat]: \n {last_msgs} \n\n [User Prompt]: \n {input_prompt} \n\n "
         new_response = self.llm(prompt=new_query, temperature=self.temperature, max_new_tokens=self.max_new_tokens)
         self.chat_log.append(new_response[:self.context_limit])
         return new_response
@@ -118,12 +116,12 @@ class AppModel:
 
 
 
+# Create a Streamlit app
+st.title("ChatBot")
 
 # init app
 new_app = AppModel()
 
-# Create a Streamlit app
-st.title("ChatBot")
 
 # Get User Prompt
 input_prompt_box = st.text_input("Enter a prompt: ")
