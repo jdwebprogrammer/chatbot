@@ -1,6 +1,6 @@
 
 # ChatBot
-- Basic ChatBot using CTransformers, ChromaDB and Streamlit
+Basic ChatBot using CTransformers, ChromaDB and Streamlit
 - See a live demo on HuggingFace at:
 - https://huggingface.co/spaces/JDWebProgrammer/chatbot
 
