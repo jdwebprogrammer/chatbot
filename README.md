@@ -4,7 +4,8 @@ Basic ChatBot using CTransformers, ChromaDB and Streamlit
 
 ![ChatBot](./assets/chatbot.png "ChatBot")
 
-
+- See a live demo on HuggingFace at:
+- https://huggingface.co/spaces/JDWebProgrammer/chatbot
 
 
 # Description
