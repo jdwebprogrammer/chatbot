@@ -59,4 +59,4 @@ with gr.Blocks(title="ChatBot", analytics_enabled=False) as chatbot:
         feedback_btn_like.click(fn=feedback_like)
         feedback_btn_dislike.click(fn=feedback_dislike)
 
-chatbot.queue().launch(server_name="0.0.0.0", server_port=7869, show_api=False)
+chatbot.queue().launch(server_name="0.0.0.0", server_port=7864, show_api=False)

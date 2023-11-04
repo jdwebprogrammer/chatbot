@@ -1,4 +1,4 @@
 ctransformers
 sentence-transformers
 chromadb
-streamlit
+gradio
