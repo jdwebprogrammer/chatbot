@@ -1,5 +1,5 @@
 
-from ctransformers import AutoModelForCausalLM
+from ctransformers import AutoModelForCausalLM, AutoConfig
 from sentence_transformers import SentenceTransformer
 from chromadb.utils import embedding_functions
 from chromadb.config import Settings
@@ -13,13 +13,14 @@ import json
 
 
 class AppModel:
-    def __init__(self, embedding_model_name, model, model_file, dataset_path="./data/logs", dir="./data", context_limit=400, temperature=0.8, max_new_tokens=1024):
+    def __init__(self, embedding_model_name, model, model_file, dataset_path="./data/logs", dir="./data", context_limit=400, temperature=0.8, max_new_tokens=1024, context_length=1024):
         self.model = model
         self.model_file = model_file
         self.embedding_model_name = embedding_model_name
+        self.model_config = AutoConfig.from_pretrained(self.model, context_length=context_length)
         self.emb_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=self.embedding_model_name.split("/")[1])
-        self.chroma_client = chromadb.Client(Settings(anonymized_telemetry=False,persist_directory="./data/vectorstore"))
-        #self.chroma_client_persist = chromadb.PersistentClient(path="./data/vectorstore",settings=Settings(anonymized_telemetry=False))
+        self.chroma_client = chromadb.Client(Settings(chroma_db_impl="duckdb+parquet",anonymized_telemetry=False)) #,persist_directory="./data/vectorstore"
+        self.chroma_client.reset()
         self.sentences = [] 
         self.ref_collection = self.chroma_client.get_or_create_collection("ref", embedding_function=self.emb_fn)
         self.logs_collection = self.chroma_client.get_or_create_collection("logs", embedding_function=self.emb_fn)
