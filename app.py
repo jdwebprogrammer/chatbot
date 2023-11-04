@@ -1,9 +1,9 @@
 
 from main import AppModel
-import streamlit as st
+import gradio as gr
+from gradio.components import Markdown, Textbox, Button
 
-MODEL_HF = "TheBloke/Mistral-7B-Code-16K-qlora-GGUF" # "TheBloke/Mistral-7B-OpenOrca-GGUF" 
-#MODEL_HF = "TheBloke/Mistral-7B-Code-16K-qlora-GGUF" # "TheBloke/Mistral-7B-Instruct-v0.1-GGUF" # "TheBloke/Mistral-7B-OpenOrca-GGUF" 
+MODEL_HF = "TheBloke/Mistral-7B-Code-16K-qlora-GGUF" # "TheBloke/Mistral-7B-OpenOrca-GGUF"  "TheBloke/Mistral-7B-Code-16K-qlora-GGUF" # "TheBloke/Mistral-7B-Instruct-v0.1-GGUF" # "TheBloke/Mistral-7B-OpenOrca-GGUF" 
 MODEL_FILE = "mistral-7b-code-16k-qlora.Q4_K_M.gguf" # "mistral-7b-instruct-v0.1.Q4_K_M.gguf" # "mistral-7b-openorca.Q4_K_M.gguf"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
@@ -15,20 +15,16 @@ Safety First: Prioritize the safety and well-being of users and others. Refrain 
 """
 
 llm_response = ""
-
-
-# Create a Streamlit app
-st.title("ChatBot")
+history = []
 
 # init app
-new_app = AppModel(EMBEDDING_MODEL, MODEL_HF, MODEL_FILE)
-
-# Get User Prompt
-input_prompt_box = st.text_input("Enter a prompt: ")
+new_app = AppModel(EMBEDDING_MODEL, MODEL_HF, MODEL_FILE, context_limit=5000, context_length=16000)
 
 
-def query_llm(input_prompt):
-    global pre_prompt_instruction, new_app
+
+def query_llm(input_prompt, new_history):
+    global history, pre_prompt_instruction, new_app
+    history = new_history
     last_msgs = str(new_app.chat_log[-3:])
     embed_result = new_app.get_embedding_docs(last_msgs + " \n\n " + input_prompt)[:new_app.context_limit]
     new_query = f"[Instruction]: {pre_prompt_instruction} \n\n [Data]: {str(embed_result)} \n\n "
@@ -38,23 +34,29 @@ def query_llm(input_prompt):
 
 
 
-# Initialize the Streamlit app
-if st.button("Get LLM Query"):
-    llm_response = query_llm(input_prompt_box)
-    print(llm_response)
-    st.write(llm_response)
+def feedback_like():
+    new_app.add_feedback(True)
+    print("Feedback submitted")
+    gr.Info("Feedback submitted")
 
-    if st.button("Like & Save"):
-        add_feedback(True)
-        print("Feedback submitted")
-        st.write("Feedback submitted")
-        
-    if st.button("Unlike & Discard"):
-        add_feedback(False)
-        print("Feedback submitted")
-        st.write("Feedback submitted")
-        
+def feedback_dislike():
+    new_app.add_feedback(False)
+    print("Feedback submitted")
+    gr.Info("Feedback submitted")
 
-#if __name__ == "__main__":
-#    pass
 
+with gr.Blocks(title="ChatBot", analytics_enabled=False) as chatbot:
+    gr.Markdown("# ChatBot")
+    gr.Markdown("Welcome to ChatBot!")
+    with gr.Row():
+        with gr.Column(scale=1):
+            gr.ChatInterface(query_llm)
+    with gr.Row():
+        with gr.Column(scale=1):
+            feedback_btn_like = gr.Button(value="Like & Save")
+        with gr.Column(scale=1):
+            feedback_btn_dislike = gr.Button(value="Dislike & Discard")
+        feedback_btn_like.click(fn=feedback_like)
+        feedback_btn_dislike.click(fn=feedback_dislike)
+
+chatbot.queue().launch(server_name="0.0.0.0", server_port=7869, show_api=False)
