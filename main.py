@@ -17,7 +17,7 @@ class AppModel:
         self.model = model
         self.model_file = model_file
         self.embedding_model_name = embedding_model_name
-        self.model_config = AutoConfig.from_pretrained(self.model, context_length=context_length)
+        self.model_config = AutoConfig.from_pretrained(self.model, context_length=context_length, allow_reset=True)
         self.emb_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=self.embedding_model_name.split("/")[1])
         self.chroma_client = chromadb.Client(Settings(chroma_db_impl="duckdb+parquet",anonymized_telemetry=False)) #,persist_directory="./data/vectorstore"
         self.chroma_client.reset()
