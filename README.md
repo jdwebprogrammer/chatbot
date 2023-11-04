@@ -22,7 +22,7 @@ pip install -r requirements.txt
 python app.py
 
 # Interface
-a web interface will start at http://0.0.0.0:7864
+The web interface will start at http://0.0.0.0:7864
 
 
 
