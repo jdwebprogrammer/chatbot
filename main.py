@@ -4,18 +4,21 @@ from sentence_transformers import SentenceTransformer
 from chromadb.utils import embedding_functions
 from chromadb.config import Settings
 from pathlib import Path
-import joblib
-
 import chromadb
 import os
 import json
 
+# TheBloke/deepseek-coder-33B-instruct-GGUF  "ddh0/Yi-6B-200K-GGUF-fp16" 
+#  "TheBloke/Mistral-7B-Code-16K-qlora-GGUF" # "TheBloke/Mistral-7B-Instruct-v0.1-GGUF" # "TheBloke/Mistral-7B-OpenOrca-GGUF" 
+# "NousResearch/Yarn-Mistral-7b-128k" "JDWebProgrammer/custom_sft_adapter" 
 
+MODEL_HF = "TheBloke/Yarn-Mistral-7B-128k-GGUF"
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 class AppModel:
-    def __init__(self, embedding_model_name, model, model_file, dataset_path="./data/logs", dir="./data", context_limit=400, temperature=0.8, max_new_tokens=1024, context_length=1024):
+    def __init__(self, embedding_model_name=EMBEDDING_MODEL, model=MODEL_HF, dataset_path="./data/logs", dir="./data", 
+        context_limit=32000, temperature=0.8, max_new_tokens=4096, context_length=128000):
         self.model = model
-        self.model_file = model_file
         self.embedding_model_name = embedding_model_name
         self.model_config = AutoConfig.from_pretrained(self.model, context_length=context_length)
         self.emb_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=self.embedding_model_name.split("/")[1])
@@ -26,7 +29,7 @@ class AppModel:
         self.init_chroma()
 
         self.embedding_model = SentenceTransformer(self.embedding_model_name)
-        self.llm = AutoModelForCausalLM.from_pretrained(self.model, model_type="mistral", config=self.model_config) # , gpu_layers=0 local_files_only=True) cache_dir="./models", 
+        self.llm = AutoModelForCausalLM.from_pretrained(self.model, model_type="mistral", config=self.model_config) #, cache_dir="./models" , gpu_layers=0 local_files_only=True) , 
         self.chat_log = []
         self.last_ai_response = ""
         self.last_user_prompt = "" 
@@ -34,12 +37,11 @@ class AppModel:
         self.temperature=temperature
         self.max_new_tokens=max_new_tokens
 
-    def get_llm_query(self, input_prompt):
-        self.last_user_prompt = str(input_prompt)
-        new_response = self.llm(prompt=input_prompt) #, temperature=self.temperature, max_new_tokens=self.max_new_tokens)
+    def get_llm_query(self, input_prompt, user_prompt):
+        self.last_user_prompt = str(user_prompt)
+        new_response = self.llm(prompt=input_prompt, temperature=self.temperature, max_new_tokens=self.max_new_tokens) #, temperature=self.temperature, max_new_tokens=self.max_new_tokens)
         self.last_ai_response = str(new_response)
-        self.chat_log.append(new_response[:self.context_limit])
-        self.save_file(f"USER: {input_prompt} \nAI_RESPONSE: {new_response} \n", "./data/logs/chat-log.txt")
+        self.save_file(f"[User_Prompt]: {user_prompt} \n[AI_Response]: {new_response} \n", "./data/logs/chat-log.txt")
         return new_response
         
     def get_embedding_values(self, input_str):
@@ -64,7 +66,7 @@ class AppModel:
             print(f"Loading Chroma (Context) Docs: {len(docs)}")
             self.logs_collection.add(documents=docs, metadatas=metas, ids=ids)
 
-    def build_chroma_docs(self, directory="./data/context", id_name="doc_"):
+    def build_chroma_docs(self, directory="./data/context", id_name="doc_", metatag={"source": "notion"}):
         directory = os.path.join(os.getcwd(), directory)
         docs = []
         metas = []
@@ -77,11 +79,14 @@ class AppModel:
                 splitter = "\n\n"
                 if ".csv" in file_path:
                     splitter = "\n"
+                anum = 0
                 for a in file_contents.split(splitter): # split first by paragraph  
                     docs.append(a)
                     ids.append(id_name + str(fnum))
-                    metas.append({"source": "notion"})
+                    additional_metas = {"dir": directory, "filename":file_path, "chunk_number": anum }
+                    metas.append({**metatag, **additional_metas})
                     fnum += 1
+                    anum += 1
         docs = list(docs)
         metas = list(metas)
         ids = list(ids)
@@ -102,7 +107,22 @@ class AppModel:
             f.write('\n\n' + str(data))
     
     def add_feedback(self, is_positive=True):
-        new_obj = { "user_prompt": self.last_user_prompt, "ai_response": self.last_ai_response, "is_positive": is_positive }
+        feedback_str = ""
         if is_positive:
+            feedback_str = "GOOD/PASS"
+            self.chat_log.append(self.last_ai_response[:self.context_limit])
             self.save_file(self.last_ai_response)
+        else:
+            feedback_str = "BAD/FAIL"
+        new_obj = f"[User_Prompt]: {self.last_user_prompt}\n[AI_Response]: {self.last_ai_response}\n[User_Feedback]: {feedback_str}\n\n"
         self.save_file(new_obj, "./data/logs/feedback-log.txt")
+
+
+    def open_file(self, file_path):
+        file_contents = ""
+        with open(file_path, "r") as file:
+            file_contents = file.read()
+        return file_contents
+
+
+

@@ -3,9 +3,6 @@ from main import AppModel
 import gradio as gr
 from gradio.components import Markdown, Textbox, Button
 
-MODEL_HF = "TheBloke/Mistral-7B-Code-16K-qlora-GGUF" # "TheBloke/Mistral-7B-OpenOrca-GGUF"  "TheBloke/Mistral-7B-Code-16K-qlora-GGUF" # "TheBloke/Mistral-7B-Instruct-v0.1-GGUF" # "TheBloke/Mistral-7B-OpenOrca-GGUF" 
-MODEL_FILE = "mistral-7b-code-16k-qlora.Q4_K_M.gguf" # "mistral-7b-instruct-v0.1.Q4_K_M.gguf" # "mistral-7b-openorca.Q4_K_M.gguf"
-EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 pre_prompt_instruction = """
 Chain of Thought: Process the information thoroughly. Understand the user's query in its entirety before formulating a response. Think step-by-step, ensuring a logical flow in the conversation.
@@ -18,7 +15,7 @@ llm_response = ""
 history = []
 
 # init app
-new_app = AppModel(EMBEDDING_MODEL, MODEL_HF, MODEL_FILE, context_limit=5000, context_length=16000)
+new_app = AppModel()
 
 
 
@@ -27,9 +24,9 @@ def query_llm(input_prompt, new_history):
     history = new_history
     last_msgs = str(new_app.chat_log[-3:])
     embed_result = new_app.get_embedding_docs(last_msgs + " \n\n " + input_prompt)[:new_app.context_limit]
-    new_query = f"[Instruction]: {pre_prompt_instruction} \n\n [Data]: {str(embed_result)} \n\n "
-    new_query += f"[Previous User Chat]: \n {last_msgs} \n\n [User Prompt]: \n {input_prompt} \n\n "
-    new_response = new_app.get_llm_query(new_query)
+    new_query = f"Instruction: {pre_prompt_instruction} \n\n Retrieved Context: {str(embed_result)} \n\n "
+    new_query += f"Previous User Chat: \n {last_msgs} \n\n User Prompt: \n {input_prompt} \n\n AI Response: \n "
+    new_response = new_app.get_llm_query(new_query, input_prompt)
     return new_response
 
 
@@ -50,7 +47,8 @@ with gr.Blocks(title="ChatBot", analytics_enabled=False) as chatbot:
     gr.Markdown("Welcome to ChatBot!")
     with gr.Row():
         with gr.Column(scale=1):
-            gr.ChatInterface(query_llm)
+            gr.ChatInterface(query_llm, examples=["What is today's date?", "Explain Einstein Field Equations in full.", "Explain what quantum theory implies.",
+                "Explain the height of our scientific understanding of the universe to a university professor."], analytics_enabled=False)
     with gr.Row():
         with gr.Column(scale=1):
             feedback_btn_like = gr.Button(value="Like & Save")
