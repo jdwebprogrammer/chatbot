@@ -52,9 +52,7 @@ with gr.Blocks(title="ChatBot", analytics_enabled=False) as chatbot:
                 "Explain the limitations of natural language processing in current AI systems.", 
                 "Compose a poem about the beauty of nature.",
                 "Write a Python function to calculate the factorial of a number.",
-                "How would you solve the traveling salesman problem using a heuristic algorithm?",
-
-                "Explain the height of our scientific understanding of the universe to a university professor."], analytics_enabled=False)
+                "How would you solve the traveling salesman problem using a heuristic algorithm?"], analytics_enabled=False)
     with gr.Row():
         with gr.Column(scale=1):
             feedback_btn_like = gr.Button(value="Like & Save")
