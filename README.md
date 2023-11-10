@@ -22,13 +22,20 @@ This is a simple ChatBot to use as a simple starting template. Just add text fil
 
 # Step 1: Install Dependencies
 First make sure you have python and pip installed. Then open a terminal and type:
+```shell
 pip install -r requirements.txt
+```
+
 
 # Step 2: Add Embeddings [Optional]
 Place text files in "./data/reference" to enhance the chatbot with extra information
 
 # Step 3: Run Chatbot
-Open a terminal and type: python app.py
+Open a terminal and type:
+```shell
+python app.py
+```
+
 The web interface will start at http://0.0.0.0:7864
 
 # Progress & Updates
@@ -50,6 +57,4 @@ The web interface will start at http://0.0.0.0:7864
 - ctransformers: https://github.com/marella/ctransformers
 - gradio: https://github.com/gradio-app/gradio
 - chroma: https://github.com/chroma-core/chroma
-
-
 
