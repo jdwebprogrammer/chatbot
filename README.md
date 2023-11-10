@@ -1,6 +1,6 @@
 
 # ChatBot
-Basic ChatBot using CTransformers, ChromaDB and Gradio
+Basic ChatBot using CTransformers, ChromaDB and Gradio. Configured for CPU.
 - See a live demo on HuggingFace at:
 - https://huggingface.co/spaces/JDWebProgrammer/chatbot
 
