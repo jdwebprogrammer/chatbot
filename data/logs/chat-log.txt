@@ -1,18 +1,5 @@
 
 
-[User_Prompt]: write a story 
-[AI_Response]:  
-
-
-[User_Prompt]: write a story 
-[AI_Response]: 
-
-
-
-
-
-
-
 
 
 
