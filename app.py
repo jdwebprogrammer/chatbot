@@ -47,7 +47,13 @@ with gr.Blocks(title="ChatBot", analytics_enabled=False) as chatbot:
     gr.Markdown("Welcome to ChatBot!")
     with gr.Row():
         with gr.Column(scale=1):
-            gr.ChatInterface(query_llm, examples=["What is today's date?", "Explain Einstein Field Equations in full.", "Explain what quantum theory implies.",
+            gr.ChatInterface(query_llm, examples=[
+                "What is today's date?", 
+                "Explain the limitations of natural language processing in current AI systems.", 
+                "Compose a poem about the beauty of nature.",
+                "Write a Python function to calculate the factorial of a number.",
+                "How would you solve the traveling salesman problem using a heuristic algorithm?",
+
                 "Explain the height of our scientific understanding of the universe to a university professor."], analytics_enabled=False)
     with gr.Row():
         with gr.Column(scale=1):
