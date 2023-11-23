@@ -36,7 +36,7 @@ class AppModel:
         self.init_chroma()
 
         self.embedding_model = SentenceTransformer(self.embedding_model_name)
-        self.llm = AutoModelForCausalLM.from_pretrained(self.model, model_type="mistral", config=self.model_config) #, cache_dir="./models" , gpu_layers=0 local_files_only=True) , 
+        self.llm = AutoModelForCausalLM.from_pretrained(self.model, model_type="mistral", device_map="auto", config=self.model_config) #, cache_dir="./models" , gpu_layers=0 local_files_only=True) , 
         self.chat_log = []
         self.last_ai_response = ""
         self.last_user_prompt = "" 
