@@ -1,8 +1,9 @@
+import logging
+logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s - %(message)s", level=logging.DEBUG)
 
 from main import AppModel
 import gradio as gr
 from gradio.components import Markdown, Textbox, Button
-
 
 pre_prompt_instruction = """
 Chain of Thought: Process the information thoroughly. Understand the user's query in its entirety before formulating a response. Think step-by-step, ensuring a logical flow in the conversation.
@@ -25,6 +26,7 @@ def query_llm(input_prompt, new_history):
     last_msgs = str(new_app.chat_log[-3:])
     embed_result = new_app.get_embedding_docs(last_msgs + " \n\n " + input_prompt)[:new_app.context_limit]
     new_query = f"Instruction: {pre_prompt_instruction} \n\n Retrieved Context: {str(embed_result)} \n\n "
+    #new_query += f"Wiki Results: \n {new_app.search_wiki(input_prompt)} \n\n " 
     new_query += f"Previous User Chat: \n {last_msgs} \n\n User Prompt: \n {input_prompt} \n\n AI Response: \n "
     new_response = new_app.get_llm_query(new_query, input_prompt)
     return new_response
@@ -33,12 +35,12 @@ def query_llm(input_prompt, new_history):
 
 def feedback_like():
     new_app.add_feedback(True)
-    print("Feedback submitted")
+    logging.info("Feedback submitted")
     gr.Info("Feedback submitted")
 
 def feedback_dislike():
     new_app.add_feedback(False)
-    print("Feedback submitted")
+    logging.info("Feedback submitted")
     gr.Info("Feedback submitted")
 
 
