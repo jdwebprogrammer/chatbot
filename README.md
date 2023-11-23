@@ -46,10 +46,11 @@ The web interface will start at http://0.0.0.0:7864
 - Embeddings properly save & persist, full custom RAG implementation working
 
 # Known Issues
-- Chat history may not be saving properly! Working on this..
+- Prompts sometimes give bogus responses - possibly from prompt instructions or context size
 - There is currently no feedback but will save feedback logs
 
 # Future Plans
+- Only tested on Linux with CPU, working towards full OS and device compatibility
 - Will be implementing auto retrieval from wiki for RAG(Retrieval Augmented Generation) loop
 - Feedback datasets will be used in the trainable project coming soon
 - Still working on instructional syntax which could be causing impaired results
